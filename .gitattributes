@@ -1,0 +1,17 @@
+* text=auto eol=lf
+
+*.vhd   text eol=lf
+*.vhdl  text eol=lf
+*.py    text eol=lf
+*.ps1   text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.tcl   text eol=lf
+*.do    text eol=lf
+
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.pdf   binary
+*.zip   binary

@@ -1,0 +1,279 @@
+# -----------------------------------------------------------------------------
+# mnist_top.qsf
+# Projeto MNIST FPGA - DE0-CV / Cyclone V
+# Controles externos via ESP32-S3 nos pinos GPIO_0.
+# -----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
+# Projeto / dispositivo
+# Observacao: a placa DE0-CV usa 5CEBA4F23C7N no manual, mas o Quartus
+# referencia o dispositivo sem o sufixo final N: 5CEBA4F23C7.
+# -----------------------------------------------------------------------------
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE 5CEBA4F23C7
+set_global_assignment -name TOP_LEVEL_ENTITY mnist_top
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name SDC_FILE mnist_top.sdc
+
+# Pinos nao usados em alta impedancia.
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
+
+# Opcoes de otimizacao razoaveis para tentar fechar 50 MHz.
+set_global_assignment -name OPTIMIZATION_MODE "AGGRESSIVE PERFORMANCE"
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name PHYSICAL_SYNTHESIS_COMBO_LOGIC ON
+set_global_assignment -name PHYSICAL_SYNTHESIS_REGISTER_DUPLICATION ON
+set_global_assignment -name ROUTER_TIMING_OPTIMIZATION_LEVEL MAXIMUM
+
+# -----------------------------------------------------------------------------
+# Arquivos VHDL do projeto
+# -----------------------------------------------------------------------------
+set_global_assignment -name VHDL_FILE ../VHDL/mnist_tipos_pkg.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/mascaras_top64_pkg.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/bias_densos_pkg.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/font_5x7_pkg.vhd
+
+set_global_assignment -name VHDL_FILE ../VHDL/acumuladores_digitos.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/argmax10.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/argmax10_signed.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/pontuador_top64_digit.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/classificador_binario_top64.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/rom_pesos_densos.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/classificador_denso_seq.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/reg_resultados.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/mnist_fd.vhd
+
+set_global_assignment -name VHDL_FILE ../VHDL/sincronizador_sinais.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/detector_borda.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/interface_entrada.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/mnist_canvas.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/mnist_uc.vhd
+
+set_global_assignment -name VHDL_FILE ../VHDL/uart_rx.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/uart_tx.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/uart_packet_rx.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/uart_packet_tx_ack.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/uart_frame_buffer.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/uart_frontend.vhd
+
+set_global_assignment -name VHDL_FILE ../VHDL/display7seg.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/display7seg_ctrl.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/leds_ctrl.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/interface_saida.vhd
+
+set_global_assignment -name VHDL_FILE ../VHDL/divisor_clock_25mhz.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/contador_pixel.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/vga_sync_640x480.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/vga_render_mnist.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/vga_render_fonts.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/vga_render_layout.vhd
+set_global_assignment -name VHDL_FILE ../VHDL/vga_top.vhd
+
+set_global_assignment -name VHDL_FILE ../VHDL/mnist_top.vhd
+
+# -----------------------------------------------------------------------------
+# Clock da DE0-CV
+# -----------------------------------------------------------------------------
+set_location_assignment PIN_M9 -to clock_50
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to clock_50
+
+# -----------------------------------------------------------------------------
+# Interface ESP32-S3 <-> FPGA via GPIO_0
+#
+# Mapeamento proposto:
+#   escreve        : ESP32-S3 -> DE0-CV GPIO_0_D0
+#   apaga          : ESP32-S3 -> DE0-CV GPIO_0_D1
+#   classifica     : ESP32-S3 -> DE0-CV GPIO_0_D2
+#   uart_rx_serial : ESP32-S3 TX -> FPGA RX / DE0-CV GPIO_0_D3
+#   uart_tx_serial : FPGA TX -> ESP32-S3 RX / DE0-CV GPIO_0_D4
+#
+# Importante: GND comum entre ESP32-S3 e DE0-CV. Sinais em 3,3 V.
+# -----------------------------------------------------------------------------
+set_location_assignment PIN_N16 -to escreve
+set_location_assignment PIN_B16 -to apaga
+set_location_assignment PIN_M16 -to classifica
+set_location_assignment PIN_C16 -to uart_rx_serial
+set_location_assignment PIN_D17 -to uart_tx_serial
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to escreve
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to apaga
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to classifica
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to uart_rx_serial
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to uart_tx_serial
+set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON -to uart_rx_serial
+
+# -----------------------------------------------------------------------------
+# LEDs vermelhos da DE0-CV
+# -----------------------------------------------------------------------------
+set_location_assignment PIN_AA2 -to ledr[0]
+set_location_assignment PIN_AA1 -to ledr[1]
+set_location_assignment PIN_W2 -to ledr[2]
+set_location_assignment PIN_Y3 -to ledr[3]
+set_location_assignment PIN_N2 -to ledr[4]
+set_location_assignment PIN_N1 -to ledr[5]
+set_location_assignment PIN_U2 -to ledr[6]
+set_location_assignment PIN_U1 -to ledr[7]
+set_location_assignment PIN_L2 -to ledr[8]
+set_location_assignment PIN_L1 -to ledr[9]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[6]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[7]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[8]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to ledr[9]
+
+# -----------------------------------------------------------------------------
+# Displays de 7 segmentos HEX0..HEX5 da DE0-CV
+# -----------------------------------------------------------------------------
+set_location_assignment PIN_U21 -to hex0[0]
+set_location_assignment PIN_V21 -to hex0[1]
+set_location_assignment PIN_W22 -to hex0[2]
+set_location_assignment PIN_W21 -to hex0[3]
+set_location_assignment PIN_Y22 -to hex0[4]
+set_location_assignment PIN_Y21 -to hex0[5]
+set_location_assignment PIN_AA22 -to hex0[6]
+
+set_location_assignment PIN_AA20 -to hex1[0]
+set_location_assignment PIN_AB20 -to hex1[1]
+set_location_assignment PIN_AA19 -to hex1[2]
+set_location_assignment PIN_AA18 -to hex1[3]
+set_location_assignment PIN_AB18 -to hex1[4]
+set_location_assignment PIN_AA17 -to hex1[5]
+set_location_assignment PIN_U22 -to hex1[6]
+
+set_location_assignment PIN_Y19 -to hex2[0]
+set_location_assignment PIN_AB17 -to hex2[1]
+set_location_assignment PIN_AA10 -to hex2[2]
+set_location_assignment PIN_Y14 -to hex2[3]
+set_location_assignment PIN_V14 -to hex2[4]
+set_location_assignment PIN_AB22 -to hex2[5]
+set_location_assignment PIN_AB21 -to hex2[6]
+
+set_location_assignment PIN_Y16 -to hex3[0]
+set_location_assignment PIN_W16 -to hex3[1]
+set_location_assignment PIN_Y17 -to hex3[2]
+set_location_assignment PIN_V16 -to hex3[3]
+set_location_assignment PIN_U17 -to hex3[4]
+set_location_assignment PIN_V18 -to hex3[5]
+set_location_assignment PIN_V19 -to hex3[6]
+
+set_location_assignment PIN_U20 -to hex4[0]
+set_location_assignment PIN_Y20 -to hex4[1]
+set_location_assignment PIN_V20 -to hex4[2]
+set_location_assignment PIN_U16 -to hex4[3]
+set_location_assignment PIN_U15 -to hex4[4]
+set_location_assignment PIN_Y15 -to hex4[5]
+set_location_assignment PIN_P9 -to hex4[6]
+
+set_location_assignment PIN_N9 -to hex5[0]
+set_location_assignment PIN_M8 -to hex5[1]
+set_location_assignment PIN_T14 -to hex5[2]
+set_location_assignment PIN_P14 -to hex5[3]
+set_location_assignment PIN_C1 -to hex5[4]
+set_location_assignment PIN_C2 -to hex5[5]
+set_location_assignment PIN_W19 -to hex5[6]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex0[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex0[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex0[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex0[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex0[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex0[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex0[6]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex1[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex1[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex1[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex1[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex1[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex1[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex1[6]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex2[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex2[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex2[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex2[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex2[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex2[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex2[6]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex3[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex3[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex3[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex3[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex3[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex3[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex3[6]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex4[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex4[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex4[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex4[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex4[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex4[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex4[6]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex5[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex5[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex5[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex5[3]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex5[4]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex5[5]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to hex5[6]
+
+# -----------------------------------------------------------------------------
+# VGA da DE0-CV
+# -----------------------------------------------------------------------------
+set_location_assignment PIN_A9 -to vga_r[0]
+set_location_assignment PIN_B10 -to vga_r[1]
+set_location_assignment PIN_C9 -to vga_r[2]
+set_location_assignment PIN_A5 -to vga_r[3]
+
+set_location_assignment PIN_L7 -to vga_g[0]
+set_location_assignment PIN_K7 -to vga_g[1]
+set_location_assignment PIN_J7 -to vga_g[2]
+set_location_assignment PIN_J8 -to vga_g[3]
+
+set_location_assignment PIN_B6 -to vga_b[0]
+set_location_assignment PIN_B7 -to vga_b[1]
+set_location_assignment PIN_A8 -to vga_b[2]
+set_location_assignment PIN_A7 -to vga_b[3]
+
+set_location_assignment PIN_H8 -to vga_hs
+set_location_assignment PIN_G8 -to vga_vs
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_r[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_r[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_r[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_r[3]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_g[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_g[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_g[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_g[3]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_b[0]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_b[1]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_b[2]
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_b[3]
+
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_hs
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to vga_vs
+
+set_global_assignment -name LAST_QUARTUS_VERSION "20.1.1 Lite Edition"
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 484
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 7
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 256
+set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
+set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
+set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+
+# ModelSim - arquivos gerados automaticamente ao simular
+modelsim/work/
+modelsim/transcript
+
+# Quartus - arquivos gerados ao compilar o projeto FPGA
+quartus/db/
+quartus/incremental_db/
+quartus/output_files/*
+!quartus/output_files/mnist_top.sof
+quartus/simulation/
+quartus/*.qws
+
+# ESP32 - pasta de build (já coberta pelo esp32/bridge/.gitignore)
+esp32/bridge/build/

@@ -1,0 +1,43 @@
+Arquivo gerado automaticamente por gerar_pesos.py
+
+Camada Keras usada no classificador denso: logits
+Threshold de binarizacao MNIST: 0.3
+
+Augmentation de treino:
+  Ativa: sim
+  aug_factor: 2
+  aug_profile: leve
+  aug_seed: 42
+  Amostras MNIST treino originais: 60000
+  Amostras finais de treino: 180000
+  Amostras teste augmentado/canvas-like: 10000
+  Modelo denso carregado por --modelo: nao
+
+
+Classificador denso quantizado:
+  Escala de quantizacao: 69.5469546118
+  Faixa q_w: -127..83
+  Biases q_b: [-43, 41, 17, -29, -1, 101, -23, 48, -98, -17]
+  Acuracia quantizada treino final: 0.916028
+  Acuracia quantizada teste MNIST original: 0.917900
+  Acuracia quantizada teste augmentado/canvas-like: 0.913500
+
+Classificador binario top-64:
+  Mascaras geradas por heatmap discriminativo one-vs-rest.
+  score_d(p): freq_d(p) - penalidade * competidor_d(p)
+  penalidade: 0.1
+  competidor: media dos outros digitos
+  Acuracia top-64 treino final: 0.703178
+  Acuracia top-64 teste MNIST original: 0.710300
+  Acuracia top-64 teste augmentado/canvas-like: 0.715200
+
+Convencao da ROM de pesos densos:
+  endereco = indice do pixel row-major, i = linha*28 + coluna
+  palavra  = [d9 | d8 | ... | d1 | d0]
+  d0 ocupa os 8 bits menos significativos
+  cada peso e interpretado no VHDL como signed(7 downto 0)
+
+Observacao:
+  O modo --augmented busca melhorar robustez a entrada dinamica/canvas-like
+  com variacoes de escala, espessura e estilo. O objetivo nao e apenas maximizar
+  a acuracia no MNIST limpo original.
