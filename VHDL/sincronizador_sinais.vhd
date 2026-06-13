@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 -- Arquivo   : sincronizador_sinais.vhd
 -------------------------------------------------------------------------------
--- Descricao : sincroniza sinais assíncronos
+-- Descricao : sincroniza sinais assincronos
 -------------------------------------------------------------------------------
 -- Revisoes  :
 --     Data        Versao  Autor                                Descricao

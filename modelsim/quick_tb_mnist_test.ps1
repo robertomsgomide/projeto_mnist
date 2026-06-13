@@ -1,3 +1,6 @@
+# WINDOWS
+# Apenas um script conveniente para compilar todos os arquivos .vhd em ordem e rodar os testbenches
+
 $ProjectRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot "..")).Path
 $ModelsimIni = "modelsim/modelsim.ini"
 $TranscriptPath = "modelsim/transcript"

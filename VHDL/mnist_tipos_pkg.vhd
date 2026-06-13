@@ -69,7 +69,7 @@ package mnist_tipos_pkg is
     subtype digito_t is unsigned(3 downto 0);
 
     --------------------------------------------------------------------
-    -- Classificador binário top-64
+    -- Classificador binario top-64
     --------------------------------------------------------------------
     constant TOP_K_C           : natural := 64;
     constant SCORE_BIN_WIDTH_C : natural := 7;

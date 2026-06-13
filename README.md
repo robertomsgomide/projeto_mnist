@@ -204,7 +204,7 @@ Para recompilar o projeto:
 
 1. No Quartus, acesse Project -> Restore Archived Project.
 2. Selecione quartus/mnist_top.qar.
-3. Escolha um diretório de destino e restaure o projeto.
+3. Escolha um diretorio de destino e restaure o projeto.
 4. Abra o projeto restaurado.
 5. Execute Processing -> Start Compilation.
 

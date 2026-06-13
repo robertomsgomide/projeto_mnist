@@ -1,10 +1,10 @@
 -------------------------------------------------------------------------------
 -- Arquivo   : classificador_binario_top64.vhd
 -------------------------------------------------------------------------------
--- Descricao : classificador binário combinacional
--- para cada dígito, existe uma lista dos 64 pixels mais representativos;
--- o classificador conta quantos desses pixels estão ativos na imagem de entrada;
--- o dígito com maior contagem é escolhido;
+-- Descricao : classificador binario combinacional
+-- para cada digito, existe uma lista dos 64 pixels mais representativos;
+-- o classificador conta quantos desses pixels estao ativos na imagem de entrada;
+-- o digito com maior contagem e escolhido;
 -------------------------------------------------------------------------------
 -- Revisoes  :
 --     Data        Versao  Autor                                Descricao

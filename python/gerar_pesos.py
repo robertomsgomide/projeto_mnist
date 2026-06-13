@@ -4,7 +4,7 @@
 gerar_pesos.py
 
 Gera, a partir de um classificador MNIST linear em TF/Keras, os arquivos VHDL
-usados pelo núcleo de classificação MNIST:
+usados pelo nucleo de classificacao MNIST:
 
   - mascaras_top64_pkg.vhd
   - bias_densos_pkg.vhd
@@ -17,41 +17,41 @@ trace_benchmark.py:
   - classificador_denso.keras
   - classificador_binario.npy
 
-O classificador denso e o classificador binário top-64 usam critérios diferentes:
+O classificador denso e o classificador binario top-64 usam criterios diferentes:
 
   - O classificador denso usa pesos quantizados int8 e bias:
         score_d = bias_d + soma Wq(pixel,d), para pixels ativos.
 
-  - O classificador binário top-64 usa apenas contagem de presença:
-        score_d = quantidade de pixels ativos dentro da máscara do dígito d.
+  - O classificador binario top-64 usa apenas contagem de presenca:
+        score_d = quantidade de pixels ativos dentro da mascara do digito d.
 
-  - As máscaras top-64 são geradas por heatmap discriminativo:
-        para cada dígito d, calcula-se a frequência média de ativação de cada
-        pixel naquele dígito e nos dígitos competidores. O score usado é:
+  - As mascaras top-64 sao geradas por heatmap discriminativo:
+        para cada digito d, calcula-se a frequência media de ativacao de cada
+        pixel naquele digito e nos digitos competidores. O score usado e:
         score_d(p) = freq_d(p) - penalidade * competidor_d(p).
-        Os top-K pixels com maior score formam a máscara daquele dígito.
+        Os top-K pixels com maior score formam a mascara daquele digito.
 
-Convenções respeitadas pelo VHDL:
+Convencoes respeitadas pelo VHDL:
 
   - imagem_mnist_t tem 784 bits;
-  - pixel i = linha*28 + coluna é acessado como imagem(i);
-  - rom_pesos_densos.vhd contém uma ROM síncrona de 784 endereços úteis x 80 bits.
+  - pixel i = linha*28 + coluna e acessado como imagem(i);
+  - rom_pesos_densos.vhd contem uma ROM sincrona de 784 enderecos uteis x 80 bits.
 
-Uso típico, com os arquivos VHDL no mesmo diretório deste script:
+Uso tipico, com os arquivos VHDL no mesmo diretorio deste script:
 
   python gerar_pesos.py --epochs 25
 
-Ou usando um modelo Keras já treinado, desde que ele tenha uma camada Dense com
+Ou usando um modelo Keras ja treinado, desde que ele tenha uma camada Dense com
 pesos de formato (784, 10):
 
   python gerar_pesos.py --modelo modelo_mnist_linear.keras
 
-Por padrão, os arquivos são escritos no mesmo diretório deste script. Para outro
+Por padrao, os arquivos sao escritos no mesmo diretorio deste script. Para outro
 local, use --saida-dir.
 
-O hardware denso deste projeto implementa uma camada linear única sobre pixels
+O hardware denso deste projeto implementa uma camada linear unica sobre pixels
 binarizados. Portanto, este script treina/espera um modelo linear Dense(10), sem
-camadas ocultas, convoluções ou ativações intermediárias.
+camadas ocultas, convolucoes ou ativacoes intermediarias.
 """
 
 from __future__ import annotations
@@ -125,7 +125,7 @@ def configurar_seed(tf, seed: int) -> None:
 
 
 def binarizar_mnist(x: np.ndarray, threshold: float) -> np.ndarray:
-    """Converte imagens MNIST uint8 0..255 para matriz float32 binária N x 784."""
+    """Converte imagens MNIST uint8 0..255 para matriz float32 binaria N x 784."""
     if not (0.0 <= threshold <= 1.0):
         raise ValueError("threshold deve estar entre 0.0 e 1.0")
 
@@ -442,7 +442,7 @@ def carregar_ou_treinar_modelo(tf, args, x_train, y_train, x_test, y_test):
     if args.modelo is not None:
         caminho_modelo = Path(args.modelo)
         if not caminho_modelo.exists():
-            raise SystemExit(f"Erro: modelo não encontrado: {caminho_modelo}")
+            raise SystemExit(f"Erro: modelo nao encontrado: {caminho_modelo}")
         modelo = tf.keras.models.load_model(caminho_modelo)
         return modelo
 
@@ -470,13 +470,13 @@ def carregar_ou_treinar_modelo(tf, args, x_train, y_train, x_test, y_test):
     )
 
     perda, acc = modelo.evaluate(x_test, y_test, verbose=0)
-    print(f"Acurácia float no teste MNIST binarizado: {acc:.4f} (loss={perda:.4f})")
+    print(f"Acuracia float no teste MNIST binarizado: {acc:.4f} (loss={perda:.4f})")
 
     return modelo
 
 
 def extrair_pesos_dense_784x10(modelo) -> Tuple[np.ndarray, np.ndarray, str]:
-    """Retorna W(784,10), b(10) da camada compatível com o hardware."""
+    """Retorna W(784,10), b(10) da camada compativel com o hardware."""
     for camada in modelo.layers:
         pesos = camada.get_weights()
         if len(pesos) != 2:
@@ -493,14 +493,14 @@ def extrair_pesos_dense_784x10(modelo) -> Tuple[np.ndarray, np.ndarray, str]:
             descricoes.append(f"{camada.name}: {[tuple(p.shape) for p in pesos]}")
 
     raise SystemExit(
-        "Erro: não encontrei no modelo uma camada Dense compatível com o hardware "
+        "Erro: nao encontrei no modelo uma camada Dense compativel com o hardware "
         f"(pesos {IMG_BITS_C}x{NUM_DIGITOS_C}, bias {NUM_DIGITOS_C}).\n"
         "Camadas com pesos encontradas:\n  - " + "\n  - ".join(descricoes)
     )
 
 
 # -----------------------------------------------------------------------------
-# Quantização do classificador denso
+# Quantizacao do classificador denso
 # -----------------------------------------------------------------------------
 
 def quantizar_int8_com_bias(
@@ -509,7 +509,7 @@ def quantizar_int8_com_bias(
     escala_manual: float | None,
 ):
     """
-    Quantização simétrica por escala única.
+    Quantizacao simetrica por escala unica.
 
     Como o hardware soma apenas pesos int8 quando pixel=1, usar a mesma escala
     para W e b preserva aproximadamente o argmax dos logits float:
@@ -537,7 +537,7 @@ def quantizar_int8_com_bias(
 
     if np.any(q_b < min_bias) or np.any(q_b > max_bias):
         raise SystemExit(
-            "Erro: algum bias quantizado não cabe em score_denso_t "
+            "Erro: algum bias quantizado nao cabe em score_denso_t "
             f"signed({SCORE_DENSO_WIDTH_C - 1} downto 0).\n"
             f"Faixa permitida: {min_bias}..{max_bias}.\n"
             f"Biases obtidos: {q_b.tolist()}\n"
@@ -557,7 +557,7 @@ def avaliar_quantizado(
     logits = x_bin.astype(np.int64) @ q_w.astype(np.int64) + q_b.astype(np.int64)
     pred = np.argmax(logits, axis=1)
     acc = float(np.mean(pred == y))
-    print(f"Acurácia quantizada ({nome}): {acc:.4f}")
+    print(f"Acuracia quantizada ({nome}): {acc:.4f}")
     return acc
 
 
@@ -572,7 +572,7 @@ def evaluate_dense(
 
 
 # -----------------------------------------------------------------------------
-# Máscaras top-64 do classificador binário
+# Mascaras top-64 do classificador binario
 # -----------------------------------------------------------------------------
 
 def escolher_indices_top64_por_heatmap(
@@ -583,18 +583,18 @@ def escolher_indices_top64_por_heatmap(
     usar_max_competidor: bool = TOP64_USAR_MAX_COMPETIDOR_C,
 ) -> np.ndarray:
     """
-    Escolhe pixels top-K para o classificador binário combinacional usando um
-    critério DISCRIMINATIVO (one-vs-rest).
+    Escolhe pixels top-K para o classificador binario combinacional usando um
+    criterio DISCRIMINATIVO (one-vs-rest).
  
-    Critério:
+    Criterio:
  
-      freq_d(p)   = média de ativação do pixel p nas imagens cujo label e d
-      comp_d(p)   = frequência do pixel p nos OUTROS dígitos
-                    (média dos 9 outros heatmaps por padrão, ou o máximo deles)
+      freq_d(p)   = media de ativacao do pixel p nas imagens cujo label e d
+      comp_d(p)   = frequência do pixel p nos OUTROS digitos
+                    (media dos 9 outros heatmaps por padrao, ou o maximo deles)
       score_d(p)  = freq_d(p) - penalidade * comp_d(p)
 
-    penalidade >= 0 controla quanto pixels comuns a outros dígitos são
-    penalizados. usar_max_competidor troca a média dos outros dígitos pelo pior
+    penalidade >= 0 controla quanto pixels comuns a outros digitos sao
+    penalizados. usar_max_competidor troca a media dos outros digitos pelo pior
     competidor por pixel.
     """
     if top_k <= 0 or top_k > IMG_BITS_C:
@@ -604,18 +604,18 @@ def escolher_indices_top64_por_heatmap(
         raise ValueError(f"x_bin deve ter formato (N, {IMG_BITS_C}); recebido {x_bin.shape}")
  
     if y.ndim != 1 or y.shape[0] != x_bin.shape[0]:
-        raise ValueError("y deve ser vetor 1D com o mesmo número de amostras de x_bin")
+        raise ValueError("y deve ser vetor 1D com o mesmo numero de amostras de x_bin")
  
-    # 1) Heatmap (frequência média de ativação por pixel) para cada dígito.
+    # 1) Heatmap (frequência media de ativacao por pixel) para cada digito.
     freq = np.zeros((NUM_DIGITOS_C, IMG_BITS_C), dtype=np.float64)
     for d in range(NUM_DIGITOS_C):
         mascara_d = y == d
         qtd = int(np.sum(mascara_d))
         if qtd == 0:
-            raise ValueError(f"não há imagens do dígito {d} para gerar a máscara top-{top_k}")
+            raise ValueError(f"nao ha imagens do digito {d} para gerar a mascara top-{top_k}")
         freq[d, :] = np.mean(x_bin[mascara_d, :], axis=0)
  
-    # 2) Score discriminativo por dígito e seleção dos top-K.
+    # 2) Score discriminativo por digito e selecao dos top-K.
     indices = np.zeros((NUM_DIGITOS_C, top_k), dtype=np.int64)
     todos = np.arange(IMG_BITS_C)
  
@@ -629,7 +629,7 @@ def escolher_indices_top64_por_heatmap(
         score = freq[d, :] - float(penalidade) * competidor
  
         # Mesma regra de desempate do original: maior score primeiro,
-        # menor índice primeiro em caso de empate (determinístico).
+        # menor indice primeiro em caso de empate (deterministico).
         ordem = np.lexsort((todos, -score))
         indices[d, :] = ordem[:top_k]
  
@@ -643,12 +643,12 @@ def avaliar_top64_binario(
     nome: str,
 ) -> float:
     """
-    Avalia em Python a mesma regra lógica do classificador binário VHDL:
+    Avalia em Python a mesma regra logica do classificador binario VHDL:
 
-      score_d = soma dos pixels ativos nos índices da máscara d
+      score_d = soma dos pixels ativos nos indices da mascara d
       pred    = argmax_d score_d
 
-    Esta avaliação é apenas diagnóstica; não altera o classificador denso.
+    Esta avaliacao e apenas diagnostica; nao altera o classificador denso.
     """
     if indices_top64.ndim != 2 or indices_top64.shape[0] != NUM_DIGITOS_C:
         raise ValueError("indices_top64 deve ter formato (10, top_k)")
@@ -661,7 +661,7 @@ def avaliar_top64_binario(
     pred = np.argmax(scores, axis=1)
     acc = float(np.mean(pred == y))
 
-    print(f"Acurácia top-{indices_top64.shape[1]} binária ({nome}): {acc:.4f}")
+    print(f"Acuracia top-{indices_top64.shape[1]} binaria ({nome}): {acc:.4f}")
     return acc
 
 
@@ -792,7 +792,7 @@ def escrever_bias_densos_pkg(caminho: Path, q_b: np.ndarray, escala: float) -> N
 
 
 def int8_para_u8(valor: int) -> int:
-    """Converte inteiro assinado de 8 bits para representação unsigned 0..255."""
+    """Converte inteiro assinado de 8 bits para representacao unsigned 0..255."""
     return int(valor) & 0xFF
 
 

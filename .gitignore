@@ -17,5 +17,5 @@ quartus/output_files/*
 quartus/simulation/
 quartus/*.qws
 
-# ESP32 - pasta de build (já coberta pelo esp32/bridge/.gitignore)
+# ESP32 - pasta de build (ja coberta pelo esp32/bridge/.gitignore)
 esp32/bridge/build/

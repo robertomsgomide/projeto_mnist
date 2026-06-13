@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 -- Arquivo   : argmax10_signed.vhd
 -------------------------------------------------------------------------------
--- Descricao : recebe dez scores com sinal e devolve o índice do maior valor
+-- Descricao : recebe dez scores com sinal e devolve o indice do maior valor
 -------------------------------------------------------------------------------
 -- Revisoes  :
 --     Data        Versao  Autor                                Descricao

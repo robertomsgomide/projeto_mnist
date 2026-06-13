@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 -- Arquivo   : argmax10.vhd
 -------------------------------------------------------------------------------
--- Descricao : recebe dez pontuações e devolve o índice do maior valor.
+-- Descricao : recebe dez pontuacoes e devolve o indice do maior valor.
 -------------------------------------------------------------------------------
 -- Revisoes  :
 --     Data        Versao  Autor                                Descricao

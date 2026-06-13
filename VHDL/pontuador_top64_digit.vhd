@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
 -- Arquivo   : pontuador_top64_digit.vhd
 -------------------------------------------------------------------------------
--- Descricao : calcula a pontuação de um dígito somando apenas os pixels
--- indicados pela lista top-64 correspondente. Esta versão evita popcount sobre
+-- Descricao : calcula a pontuacao de um digito somando apenas os pixels
+-- indicados pela lista top-64 correspondente. Esta versao evita popcount sobre
 -- os 784 pixels completos.
 -------------------------------------------------------------------------------
 -- Revisoes  :
