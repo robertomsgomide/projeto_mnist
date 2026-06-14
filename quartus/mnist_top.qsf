@@ -6,8 +6,6 @@
 
 # -----------------------------------------------------------------------------
 # Projeto / dispositivo
-# Observacao: a placa DE0-CV usa 5CEBA4F23C7N no manual, mas o Quartus
-# referencia o dispositivo sem o sufixo final N: 5CEBA4F23C7.
 # -----------------------------------------------------------------------------
 set_global_assignment -name FAMILY "Cyclone V"
 set_global_assignment -name DEVICE 5CEBA4F23C7
