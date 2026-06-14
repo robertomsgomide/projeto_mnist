@@ -10,7 +10,7 @@
 -------------------------------------------------------------------------------
 -- Revisoes  :
 --     Data        Versao  Autor                                Descricao
---     18/05/2026  1.0     Roberto M S Gomide / Rodrigo Haruna  novo componente
+--     18/05/2026  1.0     Roberto M S Gomide / Rodrigo Haruna  versao inicial
 -------------------------------------------------------------------------------
 library ieee;
 use ieee.std_logic_1164.all;
