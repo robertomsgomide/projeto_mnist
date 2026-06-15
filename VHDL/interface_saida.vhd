@@ -105,7 +105,7 @@ architecture estrutural of interface_saida is
 
 begin
 
-    aguarda_s <= '1' when estado_uc = UC_AGUARDA_C else '0';
+    aguarda_s <= '1' when estado_uc = UC_IDLE_C else '0';
 
     u_leds_ctrl : leds_ctrl
         port map (
