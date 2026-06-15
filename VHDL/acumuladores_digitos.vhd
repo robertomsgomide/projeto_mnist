@@ -2,7 +2,7 @@
 -- Arquivo   : acumuladores_digitos.vhd
 -------------------------------------------------------------------------------
 -- Descricao : guarda dez acumuladores assinados de 20 bits.
--- Na limpeza de uma nova inferência, os acumuladores recebem os biases
+-- Na limpeza de uma nova inferencia, os acumuladores recebem os biases
 -- quantizados do classificador denso.
 -------------------------------------------------------------------------------
 -- Revisoes  :

@@ -26,7 +26,7 @@ O classificador denso e o classificador binario top-64 usam criterios diferentes
         score_d = quantidade de pixels ativos dentro da mascara do digito d.
 
   - As mascaras top-64 sao geradas por heatmap discriminativo:
-        para cada digito d, calcula-se a frequência media de ativacao de cada
+        para cada digito d, calcula-se a frequencia media de ativacao de cada
         pixel naquele digito e nos digitos competidores. O score usado e:
         score_d(p) = freq_d(p) - penalidade * competidor_d(p).
         Os top-K pixels com maior score formam a mascara daquele digito.
@@ -589,7 +589,7 @@ def escolher_indices_top64_por_heatmap(
     Criterio:
  
       freq_d(p)   = media de ativacao do pixel p nas imagens cujo label e d
-      comp_d(p)   = frequência do pixel p nos OUTROS digitos
+      comp_d(p)   = frequencia do pixel p nos OUTROS digitos
                     (media dos 9 outros heatmaps por padrao, ou o maximo deles)
       score_d(p)  = freq_d(p) - penalidade * comp_d(p)
 
@@ -606,7 +606,7 @@ def escolher_indices_top64_por_heatmap(
     if y.ndim != 1 or y.shape[0] != x_bin.shape[0]:
         raise ValueError("y deve ser vetor 1D com o mesmo numero de amostras de x_bin")
  
-    # 1) Heatmap (frequência media de ativacao por pixel) para cada digito.
+    # 1) Heatmap (frequencia media de ativacao por pixel) para cada digito.
     freq = np.zeros((NUM_DIGITOS_C, IMG_BITS_C), dtype=np.float64)
     for d in range(NUM_DIGITOS_C):
         mascara_d = y == d
