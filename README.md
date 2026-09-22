@@ -1,5 +1,11 @@
 # Classificador MNIST em FPGA com Entrada Dinamica via UART
 
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/f9b5f64c-d7d4-4faa-b39c-f9441422f909" alt="bancada_demo" width="600">
+  <p><em>Foto registada em bancada</em></p>
+</div>
+
+
 Projeto em VHDL para classificar digitos manuscritos no formato MNIST usando a
 FPGA **DE0-CV** (Cyclone V). A entrada vem de uma GUI Python no PC, passa por
 uma ponte ESP32-S3 e chega a FPGA como frames 28x28 compactados via UART. A
